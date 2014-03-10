@@ -1,0 +1,8 @@
+# this is the directory where uploads go
+
+# this gitignore file is the best way to sync an otherwise empty directory
+
+
+*
+
+!.gitignore

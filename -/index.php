@@ -4,14 +4,14 @@ include('config.php');
 include('SIDB423.php');
 include('db.php');
 
-define('LESSN_VERSION',	'1.1');
+define('UPPN_VERSION',	'1.1.1');
 
-define('LESSN_DOMAIN', 	preg_replace('#^www\.#', '', $_SERVER['SERVER_NAME']));
-define('LESSN_URL', 	str_replace('-/index.php', '', 'http://'.LESSN_DOMAIN.$_SERVER['PHP_SELF']));
+define('UPPN_DOMAIN', 	preg_replace('#^www\.#', '', $_SERVER['SERVER_NAME']));
+define('UPPN_URL', 	str_replace('-/index.php', '', 'http://'.UPPN_DOMAIN.$_SERVER['PHP_SELF']));
 
 define('COOKIE_NAME', 	DB_PREFIX.'auth');
 define('COOKIE_VALUE',	md5(USERNAME.PASSWORD.COOKIE_SALT));
-define('COOKIE_DOMAIN', '.'.LESSN_DOMAIN);
+define('COOKIE_DOMAIN', '.'.UPPN_DOMAIN);
 
 if (!defined('API_SALT')) define('API_SALT', 'L35sm4K35M0U7hSAP1'); // added in 1.0.5
 define('API_KEY', md5(USERNAME.PASSWORD.API_SALT));
@@ -55,43 +55,73 @@ else if (!isset($_GET['api']))
 }
 
 // new shortcut
-if (isset($_GET['url']) && !empty($_GET['url']))
+if (isset($_FILES['media']) && !empty($_FILES['media']))
 {
-	$url = $_GET['url'];
-	if (!preg_match('#^[^:]+://#', $url))
-	{
-		$url = 'http://'.$url;
-	}
-	$checksum 		= sprintf('%u', crc32($url));
-	if ($db->query($db->prepare('SELECT `id` FROM `'.DB_PREFIX.'urls` WHERE `checksum`=? AND `url`=? LIMIT 1', $checksum, $url))) {
-		if ($rows = $db->rows()) {
-			$id = $rows[0]['id'];
+	$file = $_FILES['media'];
+	$info = getimagesize($file['tmp_name']);
+
+	if($info !== false){
+		$mime = $info['mime'];
+
+		if(in_array($mime, $ALLOWED_TYPES)){
+			$ext = explode('.', $file['name']);
+			$ext = end($ext);
+
+			$chars = range('a', 'z');
+			$filename = '';
+			for($i = 0; $i < 6; $i++){
+				shuffle($chars);
+				$filename .= current($chars);
+			}
+			$filename .= '.' . $ext;
+
+			@move_uploaded_file($file['tmp_name'], '../p/' . $filename);
+
+			$url = UPPN_URL . 'p/' . $filename;
+			if (!preg_match('#^[^:]+://#', $url))
+			{
+				$url = 'http://'.$url;
+			}
+			$checksum 		= sprintf('%u', crc32($url));
+			if ($db->query($db->prepare('SELECT `id` FROM `'.DB_PREFIX.'urls` WHERE `checksum`=? AND `url`=? LIMIT 1', $checksum, $url))) {
+				if ($rows = $db->rows()) {
+					$id = $rows[0]['id'];
+				}
+				else {
+					$db->query($db->prepare('INSERT INTO `'.DB_PREFIX.'urls` SET `url`=?, `checksum`=?, `mime`=?', $filename, $checksum, $mime));
+					$id = $db->insert_id();
+				}
+			}
+			$new_url = UPPN_URL.base_convert($id, 10, 36);
+			
+			if (isset($_GET['tweet']))
+			{
+				$_GET['redirect'] = 'http://twitter.com/?status=%l';
+			}
+			
+			if (isset($_GET['redirect']))
+			{
+				header('Location:'.str_replace('%l', urlencode($new_url), $_GET['redirect']));
+				exit();
+			}
+			
+			if (isset($_GET['api']))
+			{
+				if(isset($_GET['mediaurl'])){ // for twitter apps
+					echo '<mediaurl>'.$new_url.'</mediaurl>';
+					exit();
+				}
+				echo $new_url;
+				exit();
+			}
+			
+			include('pages/done.php');
+		} else {
+			header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+			header('Status:404');
+			die('404 Not Found');
 		}
-		else {
-			$db->query($db->prepare('INSERT INTO `'.DB_PREFIX.'urls` SET `url`=?, `checksum`=?', $url, $checksum));
-			$id = $db->insert_id();
-		}
 	}
-	$new_url = LESSN_URL.base_convert($id, 10, 36);
-	
-	if (isset($_GET['tweet']))
-	{
-		$_GET['redirect'] = 'http://twitter.com/?status=%l';
-	}
-	
-	if (isset($_GET['redirect']))
-	{
-		header('Location:'.str_replace('%l', urlencode($new_url), $_GET['redirect']));
-		exit();
-	}
-	
-	if (isset($_GET['api']))
-	{
-		echo $new_url;
-		exit();
-	}
-	
-	include('pages/done.php');
 }
 else
 {

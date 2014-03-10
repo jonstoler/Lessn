@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<title>Lessn</title>
-<meta name="generator" content="Lessn <?php echo LESSN_VERSION;?> (Shaun Inman&#8217;s fingertips)" /> 
+<title>Uppn</title>
+<meta name="generator" content="Uppn <?php echo UPPN_VERSION;?> (Shaun Inman&#8217;s fingertips)" /> 
 <style>
 body
 {

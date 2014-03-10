@@ -1,3 +1,7 @@
+1.1.1 (Uppn Fork)
+- renamed to Uppn
+- changed into a file uploader/shortener rather than just a url shortener
+
 1.1
 - added "Updating to 1.1 from 1.0.7" to README.txt
 - added SIDB to migrate away from the deprecated mysql_* functions

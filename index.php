@@ -12,9 +12,8 @@ if (isset($_GET['token']))
 		if ($rows = $db->rows()) {
 			$row = $rows[0];
 			
-			header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
-			header('Location:'.stripslashes($row['url']));
-			exit();
+			header('Content-Type: ' . $row['mime']);
+			die(file_get_contents('p/' . $row['url']));
 		}
 	}
 }
