@@ -107,7 +107,7 @@ if (isset($_FILES['media']) && !empty($_FILES['media']))
 			
 			if (isset($_GET['api']))
 			{
-				echo '<mediaurl>'.$new_url.'</mediaurl>';
+				echo '<mediaurl>'.$new_url.'.'.$ext.'</mediaurl>';
 				exit();
 			}
 			
