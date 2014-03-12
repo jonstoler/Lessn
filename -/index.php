@@ -108,7 +108,7 @@ if (isset($_FILES['media']) && !empty($_FILES['media']))
 			if (isset($_GET['api']))
 			{
 				if(isset($_GET['mediaurl'])){ // for twitter apps
-					echo '<mediaurl>'.$new_url.'</mediaurl>';
+					echo '&lt;mediaurl&gt;'.$new_url.'&lt;/mediaurl&gt;';
 					exit();
 				}
 				echo $new_url;
