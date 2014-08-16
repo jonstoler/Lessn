@@ -58,11 +58,9 @@ else if (!isset($_GET['api']))
 if (isset($_FILES['media']) && !empty($_FILES['media']))
 {
 	$file = $_FILES['media'];
-	$info = getimagesize($file['tmp_name']);
+	$mime = mime_content_type($file['tmp_name']);
 
-	if($info !== false){
-		$mime = $info['mime'];
-
+	if($mime){
 		if(in_array($mime, $ALLOWED_TYPES)){
 			$ext = explode('.', $file['name']);
 			$ext = end($ext);
